@@ -1,0 +1,21 @@
+#include <Wio3GforArduino.h>
+#include <Ultrasonic.h>			// https://github.com/Seeed-Studio/Grove_Ultrasonic_Ranger
+
+#define ULTRASONIC_PIN  (WIO_D38)
+#define INTERVAL        (100)
+
+Ultrasonic UltrasonicRanger(ULTRASONIC_PIN);
+
+void setup() {
+  SerialUSB.begin(115200);
+}
+
+void loop() {
+  long distance;
+  distance = UltrasonicRanger.MeasureInCentimeters();
+  SerialUSB.print(distance);
+  SerialUSB.println("[cm]");
+  
+  delay(INTERVAL);
+}
+

@@ -1,0 +1,38 @@
+#include <Wio3GforArduino.h>
+
+#define ROTARY_ANGLE_PIN  (WIO_A4)
+#define INTERVAL          (500)
+#define BAR_LENGTH        (40)
+
+Wio3G Wio;
+
+void setup() {
+  delay(200);
+
+  SerialUSB.begin(115200);
+  SerialUSB.println("");
+  SerialUSB.println("--- START ---------------------------------------------------");
+
+  SerialUSB.println("### I/O Initialize.");
+  Wio.Init();
+
+  SerialUSB.println("### Power supply ON.");
+  Wio.PowerSupplyGrove(true);
+  delay(500);
+
+  SerialUSB.println("### Setup pin mode.");
+  pinMode(ROTARY_ANGLE_PIN, INPUT_ANALOG);
+}
+
+void loop() {
+  int rotaryAngle = analogRead(ROTARY_ANGLE_PIN);
+
+  int i;
+  for (i = 0; i < BAR_LENGTH * rotaryAngle / 4095; i++) SerialUSB.print("*");
+  for (; i < BAR_LENGTH; i++) SerialUSB.print(".");
+  SerialUSB.print(" ");
+  SerialUSB.println(rotaryAngle);
+  
+  delay(INTERVAL);
+}
+
