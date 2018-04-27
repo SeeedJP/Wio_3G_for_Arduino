@@ -137,8 +137,6 @@ void Wio3G::Init()
 	// Status Indication
 	pinMode(MODULE_STATUS_PIN, INPUT_PULLUP);
 	// Main UART Interface
-	//pinMode(MODULE_CTS_PIN, INPUT);
-	//pinMode(MODULE_RTS_PIN, OUTPUT); digitalWrite(MODULE_RTS_PIN, LOW);
 	pinMode(MODULE_DTR_PIN, OUTPUT); digitalWrite(MODULE_DTR_PIN, LOW);
 
 	SerialModule.begin(115200);
