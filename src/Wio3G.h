@@ -48,6 +48,8 @@ private:
 
 	bool HttpSetUrl(const char* url);
 
+	size_t copyStringToBuffer(const std::string& str, char* out, size_t outl);
+
 public:
 	bool ReadResponseCallback(const char* response);	// Internal use only.
 
@@ -87,4 +89,6 @@ public:
 	int HttpGet(const char* url, char* data, int dataSize);
 	bool HttpPost(const char* url, const char* data, int* responseCode);
 
+	bool WaitForCSRegistration();
+	bool SendUSSD(const char* in, char* out, size_t* outl);
 };
