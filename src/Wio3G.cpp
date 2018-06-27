@@ -336,6 +336,33 @@ bool Wio3G::GetTime(struct tm* tim)
 	return RET_OK(true);
 }
 
+//! Wait for location registration completed.
+bool Wio3G::WaitForCSRegistration()
+{
+	std::string response;
+	ArgumentParser parser;
+
+	Stopwatch sw;
+	sw.Restart();
+	while (true) {
+		int status;
+
+		_AtSerial.WriteCommand("AT+CREG?");
+		if (!_AtSerial.ReadResponse("^\\+CREG: (.*)$", 500, &response)) return RET_ERR(false, E_UNKNOWN);
+		parser.Parse(response.c_str());
+		if (parser.Size() < 2) return RET_ERR(false, E_UNKNOWN);
+		//resultCode = atoi(parser[0]);
+		status = atoi(parser[1]);
+		if (!_AtSerial.ReadResponse("^OK$", 500, NULL)) return RET_ERR(false, E_UNKNOWN);
+		if (status == 0) return RET_ERR(false, E_UNKNOWN);
+		if (status == 1 || status == 5) break;
+
+		if (sw.ElapsedMilliseconds() >= 120000) return RET_ERR(false, E_UNKNOWN);
+	}
+
+	return RET_OK(true);
+}
+
 bool Wio3G::Activate(const char* accessPointName, const char* userName, const char* password)
 {
 	std::string response;
@@ -635,81 +662,38 @@ bool Wio3G::HttpPost(const char* url, const char* data, int* responseCode)
 	return RET_OK(true);
 }
 
-//! Wait for location registration completed.
-bool Wio3G::WaitForCSRegistration()
-{
-	std::string response;
-	ArgumentParser parser;
-
-	Stopwatch sw;
-	sw.Restart();
-	while (true) {
-		int status;
-
-		_AtSerial.WriteCommand("AT+CREG?");
-		if (!_AtSerial.ReadResponse("^\\+CREG: (.*)$", 500, &response)) return RET_ERR(false, E_UNKNOWN);
-		parser.Parse(response.c_str());
-		if (parser.Size() < 2) return RET_ERR(false, E_UNKNOWN);
-		//resultCode = atoi(parser[0]);
-		status = atoi(parser[1]);
-		if (!_AtSerial.ReadResponse("^OK$", 500, NULL)) return RET_ERR(false, E_UNKNOWN);
-		if (status == 0) return RET_ERR(false, E_UNKNOWN);
-		if (status == 1 || status == 5) break;
-
-		if (sw.ElapsedMilliseconds() >= 120000) return RET_ERR(false, E_UNKNOWN);
-	}
-
-	return RET_OK(true);
-}
-
 //! Send a USSD message.
 /*!
   \param in    a pointer to an input string (ASCII characters) which will be sent to SORACOM Beam/Funnel/Harvest
 	             after converted to GSM default 7 bit alphabets. allowed up to 182 characters.
   \param out   a pointer to an output buffer to receive response message.
-  \param outl  [in]  specify allocated size of `out` in bytes. if the response from the server is larget than outl, the response will be truncated.
-	             [out] returns filled size of `out` in bytes. including trailing '\0' terminater.
+  \param outSize specify allocated size of `out` in bytes.
 */
-bool Wio3G::SendUSSD(const char* in, char* out, size_t* outl)
+bool Wio3G::SendUSSD(const char* in, char* out, int outSize)
 {
-	if (in == NULL || out == NULL || outl == NULL) {
+	if (in == NULL || out == NULL) {
 		return RET_ERR(false, E_UNKNOWN);
 	}
-	size_t inl = strlen(in);
-	if (inl > 182) {
-		SerialUSB.println("the maximum size of a USSD message is 182 characters.");
+	if (strlen(in) > 182) {
+		DEBUG_PRINTLN("the maximum size of a USSD message is 182 characters.");
 		return RET_ERR(false, E_UNKNOWN);
 	}
 
 	StringBuilder str;
-	if (!str.WriteFormat("AT+CUSD=1,\"%s\",15", in)) {
-		SerialUSB.println("error while sending 'AT+CUSD'");
+	if (!str.WriteFormat("AT+CUSD=1,\"%s\"", in)) {
+		DEBUG_PRINTLN("error while sending 'AT+CUSD'");
 		return RET_ERR(false, E_UNKNOWN);
 	}
 	_AtSerial.WriteCommand(str.GetString());
 
 	std::string response;
 	if (!_AtSerial.ReadResponse("^\\+CUSD: [0-9],\"(.*)\",[0-9]+$", 120000, &response)) {
-		SerialUSB.println("error while reading response of 'AT+CUSD'");
+		DEBUG_PRINTLN("error while reading response of 'AT+CUSD'");
 		return RET_ERR(false, E_UNKNOWN);
 	}
 
-	size_t siz = copyStringToBuffer(response, out, *outl);
-	*outl = siz;
+	if ((int)response.size() + 1 > outSize) return RET_ERR(false, E_UNKNOWN);
+	strcpy(out, response.c_str());
 
 	return RET_OK(true);
-}
-
-size_t Wio3G::copyStringToBuffer(const std::string& str, char* out, size_t outl) {
-	size_t siz = str.length() + 1; // length of string + null terminator = required buffer size
-
-	if (siz > outl) { // too large, string to be truncated
-		siz = outl;
-	}
-
-	memcpy(out, str.c_str(), siz);
-
-	out[siz - 1] = '\0';
-
-	return siz;
 }

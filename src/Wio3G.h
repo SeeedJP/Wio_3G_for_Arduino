@@ -48,8 +48,6 @@ private:
 
 	bool HttpSetUrl(const char* url);
 
-	size_t copyStringToBuffer(const std::string& str, char* out, size_t outl);
-
 public:
 	bool ReadResponseCallback(const char* response);	// Internal use only.
 
@@ -72,6 +70,7 @@ public:
 	int GetReceivedSignalStrength();
 	bool GetTime(struct tm* tim);
 
+	bool WaitForCSRegistration();
 	bool Activate(const char* accessPointName, const char* userName, const char* password);
 	bool Deactivate();
 
@@ -89,6 +88,6 @@ public:
 	int HttpGet(const char* url, char* data, int dataSize);
 	bool HttpPost(const char* url, const char* data, int* responseCode);
 
-	bool WaitForCSRegistration();
-	bool SendUSSD(const char* in, char* out, size_t* outl);
+	bool SendUSSD(const char* in, char* out, int outSize);
+
 };

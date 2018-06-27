@@ -35,9 +35,8 @@ void setup() {
   //const char* message = "*901021*123# ";  // Funnel
   //const char* message = "*901031*123#";  // Harvest
   char response[256];
-  size_t respLen = sizeof(response);
 
-  if (!Wio.SendUSSD(message, response, &respLen)) {
+  if (!Wio.SendUSSD(message, response, sizeof (response))) {
     SerialUSB.println("### ERROR! ###");
     return;
   }
