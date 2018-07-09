@@ -70,8 +70,9 @@ public:
 	int GetReceivedSignalStrength();
 	bool GetTime(struct tm* tim);
 
-	bool WaitForCSRegistration();
-	bool Activate(const char* accessPointName, const char* userName, const char* password);
+	bool WaitForCSRegistration(long timeout = 120000);
+	bool WaitForPSRegistration(long timeout = 120000);
+	bool Activate(const char* accessPointName, const char* userName, const char* password, long waitForRegistTimeout = 120000);
 	bool Deactivate();
 
 	//bool GetLocation(double* longitude, double* latitude);

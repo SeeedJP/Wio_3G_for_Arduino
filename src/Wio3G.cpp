@@ -336,8 +336,7 @@ bool Wio3G::GetTime(struct tm* tim)
 	return RET_OK(true);
 }
 
-//! Wait for location registration completed.
-bool Wio3G::WaitForCSRegistration()
+bool Wio3G::WaitForCSRegistration(long timeout)
 {
 	std::string response;
 	ArgumentParser parser;
@@ -357,13 +356,20 @@ bool Wio3G::WaitForCSRegistration()
 		if (status == 0) return RET_ERR(false, E_UNKNOWN);
 		if (status == 1 || status == 5) break;
 
-		if (sw.ElapsedMilliseconds() >= 120000) return RET_ERR(false, E_UNKNOWN);
+		if (sw.ElapsedMilliseconds() >= (unsigned long)timeout) return RET_ERR(false, E_UNKNOWN);
 	}
+
+	// for debug.
+#ifdef WIO_DEBUG
+	char str[100];
+	sprintf(str, "Elapsed time is %lu[msec.].", sw.ElapsedMilliseconds());
+	DEBUG_PRINTLN(str);
+#endif // WIO_DEBUG
 
 	return RET_OK(true);
 }
 
-bool Wio3G::Activate(const char* accessPointName, const char* userName, const char* password)
+bool Wio3G::WaitForPSRegistration(long timeout)
 {
 	std::string response;
 	ArgumentParser parser;
@@ -383,8 +389,25 @@ bool Wio3G::Activate(const char* accessPointName, const char* userName, const ch
 		if (status == 0) return RET_ERR(false, E_UNKNOWN);
 		if (status == 1 || status == 5) break;
 
-		if (sw.ElapsedMilliseconds() >= 120000) return RET_ERR(false, E_UNKNOWN);
+		if (sw.ElapsedMilliseconds() >= (unsigned long)timeout) return RET_ERR(false, E_UNKNOWN);
 	}
+
+	// for debug.
+#ifdef WIO_DEBUG
+	char str[100];
+	sprintf(str, "Elapsed time is %lu[msec.].", sw.ElapsedMilliseconds());
+	DEBUG_PRINTLN(str);
+#endif // WIO_DEBUG
+
+	return RET_OK(true);
+}
+
+bool Wio3G::Activate(const char* accessPointName, const char* userName, const char* password, long waitForRegistTimeout)
+{
+	std::string response;
+	ArgumentParser parser;
+
+	if (!WaitForPSRegistration(waitForRegistTimeout)) return RET_ERR(false, E_UNKNOWN);
 
 	// for debug.
 #ifdef WIO_DEBUG
@@ -396,6 +419,7 @@ bool Wio3G::Activate(const char* accessPointName, const char* userName, const ch
 	if (!str.WriteFormat("AT+QICSGP=1,1,\"%s\",\"%s\",\"%s\",1", accessPointName, userName, password)) return RET_ERR(false, E_UNKNOWN);
 	if (!_AtSerial.WriteCommandAndReadResponse(str.GetString(), "^OK$", 500, NULL)) return RET_ERR(false, E_UNKNOWN);
 
+	Stopwatch sw;
 	sw.Restart();
 	while (true) {
 		_AtSerial.WriteCommand("AT+QIACT=1");
