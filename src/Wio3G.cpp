@@ -196,9 +196,9 @@ bool Wio3G::TurnOnOrReset()
 		if (sw.ElapsedMilliseconds() >= 10000) return RET_ERR(false, E_UNKNOWN);
 	}
 	DEBUG_PRINTLN("");
-	delay(5000);	// TODO
 
 	if (!_AtSerial.WriteCommandAndReadResponse("ATE0", "^OK$", 500, NULL)) return RET_ERR(false, E_UNKNOWN);
+	_AtSerial.SetEcho(false);
 
 	sw.Restart();
 	while (true) {
