@@ -77,6 +77,17 @@ bool Wio3G::IsBusy() const
 	return digitalRead(MODULE_STATUS_PIN) ? false : true;
 }
 
+bool Wio3G::IsRespond()
+{
+	Stopwatch sw;
+	sw.Restart();
+	while (!_AtSerial.WriteCommandAndReadResponse("AT", "^OK$", 500, NULL)) {
+		if (sw.ElapsedMilliseconds() >= 2000) return false;
+	}
+
+	return true;
+}
+
 bool Wio3G::Reset()
 {
 	digitalWrite(MODULE_RESET_PIN, HIGH);
@@ -180,7 +191,7 @@ bool Wio3G::TurnOnOrReset()
 {
 	std::string response;
 
-	if (!IsBusy()) {
+	if (IsRespond()) {
 		DEBUG_PRINTLN("Reset()");
 		if (!Reset()) return RET_ERR(false, E_UNKNOWN);
 	}

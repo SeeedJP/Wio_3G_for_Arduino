@@ -43,6 +43,7 @@ private:
 	int ReturnError(int lineNumber, int value, ErrorCodeType errorCode);
 
 	bool IsBusy() const;
+	bool IsRespond();
 	bool Reset();
 	bool TurnOn();
 
