@@ -43,6 +43,7 @@ private:
 	int ReturnError(int lineNumber, int value, ErrorCodeType errorCode);
 
 	bool IsBusy() const;
+	bool IsRespond();
 	bool Reset();
 	bool TurnOn();
 
@@ -70,7 +71,9 @@ public:
 	int GetReceivedSignalStrength();
 	bool GetTime(struct tm* tim);
 
-	bool Activate(const char* accessPointName, const char* userName, const char* password);
+	bool WaitForCSRegistration(long timeout = 120000);
+	bool WaitForPSRegistration(long timeout = 120000);
+	bool Activate(const char* accessPointName, const char* userName, const char* password, long waitForRegistTimeout = 120000);
 	bool Deactivate();
 
 	//bool GetLocation(double* longitude, double* latitude);
@@ -86,5 +89,7 @@ public:
 
 	int HttpGet(const char* url, char* data, int dataSize);
 	bool HttpPost(const char* url, const char* data, int* responseCode);
+
+	bool SendUSSD(const char* in, char* out, int outSize);
 
 };

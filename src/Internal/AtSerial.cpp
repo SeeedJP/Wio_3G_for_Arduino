@@ -12,8 +12,13 @@
 #define CHAR_CR (0x0d)
 #define CHAR_LF (0x0a)
 
-AtSerial::AtSerial(SerialAPI* serial, Wio3G* wio3G) : _Serial(serial), _Wio3G(wio3G)
+AtSerial::AtSerial(SerialAPI* serial, Wio3G* wio3G) : _Serial(serial), _Wio3G(wio3G), _EchoOn(true)
 {
+}
+
+void AtSerial::SetEcho(bool on)
+{
+	_EchoOn = on;
 }
 
 bool AtSerial::WaitForAvailable(Stopwatch* sw, unsigned long timeout) const
@@ -113,7 +118,7 @@ bool AtSerial::ReadResponse(const char* pattern, unsigned long timeout, std::str
 		if (!WaitForAvailable(&sw, timeout)) return false;
 
 		std::string response;
-		if (!ReadResponseInternal(internalPattern, READ_BYTE_TIMEOUT, &response, RESPONSE_MAX_LENGTH)) return false;
+		if (!ReadResponseInternal(internalPattern, _EchoOn ? timeout : READ_BYTE_TIMEOUT, &response, RESPONSE_MAX_LENGTH)) return false;
 
 		if (_Wio3G->ReadResponseCallback(response.c_str())) {
 			continue;

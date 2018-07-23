@@ -11,11 +11,14 @@ class AtSerial
 private:
 	SerialAPI* _Serial;
 	Wio3G* _Wio3G;
+	unsigned long _EchoOn;
 
 	bool ReadResponseInternal(const char* pattern, unsigned long timeout, std::string* response, int responseMaxLength);
 
 public:
 	AtSerial(SerialAPI* serial, Wio3G* wio3G);
+
+	void SetEcho(bool on);
 
 	bool WaitForAvailable(Stopwatch* sw, unsigned long timeout) const;
 
