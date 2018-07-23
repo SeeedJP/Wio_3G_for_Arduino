@@ -32,8 +32,8 @@
 // Status Indication
 #define MODULE_STATUS_PIN   PINNAME_TO_PIN('B', 15) // in
 // Main UART Interface
-#define MODULE_CTS_PIN      PINNAME_TO_PIN('A', 0)  // out
-#define MODULE_RTS_PIN      PINNAME_TO_PIN('A', 1)  // in
+#define MODULE_CTS_PIN      PINNAME_TO_PIN('A', 1)  // in
+#define MODULE_RTS_PIN      PINNAME_TO_PIN('A', 0)  // out
 #define MODULE_DTR_PIN      PINNAME_TO_PIN('C', 5)  // out
 
 #define LED_VDD_PIN			PINNAME_TO_PIN('E', 8)  // out
