@@ -150,6 +150,7 @@ void Wio3G::Init()
 	// Main UART Interface
 	pinMode(MODULE_DTR_PIN, OUTPUT); digitalWrite(MODULE_DTR_PIN, LOW);
 
+	SerialModule.setReadBufferSize(100);
 	SerialModule.begin(115200);
 
 	////////////////////
@@ -208,6 +209,8 @@ bool Wio3G::TurnOnOrReset()
 
 	if (!_AtSerial.WriteCommandAndReadResponse("ATE0", "^OK$", 500, NULL)) return RET_ERR(false, E_UNKNOWN);
 	_AtSerial.SetEcho(false);
+
+	if (!_AtSerial.WriteCommandAndReadResponse("AT+IFC=2,2", "^OK$", 500, NULL)) return RET_ERR(false, E_UNKNOWN);
 
 	sw.Restart();
 	while (true) {
