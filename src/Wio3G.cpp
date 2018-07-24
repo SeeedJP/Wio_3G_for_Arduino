@@ -79,12 +79,20 @@ bool Wio3G::IsBusy() const
 
 bool Wio3G::IsRespond()
 {
+	auto writeTimeout = SerialModule.getWriteTimeout();
+	SerialModule.setWriteTimeout(10);
+
 	Stopwatch sw;
 	sw.Restart();
 	while (!_AtSerial.WriteCommandAndReadResponse("AT", "^OK$", 500, NULL)) {
-		if (sw.ElapsedMilliseconds() >= 2000) return false;
+		if (sw.ElapsedMilliseconds() >= 2000)
+		{
+			SerialModule.setWriteTimeout(writeTimeout);
+			return false;
+		}
 	}
 
+	SerialModule.setWriteTimeout(writeTimeout);
 	return true;
 }
 
@@ -151,6 +159,7 @@ void Wio3G::Init()
 	pinMode(MODULE_DTR_PIN, OUTPUT); digitalWrite(MODULE_DTR_PIN, LOW);
 
 	SerialModule.setReadBufferSize(100);
+	SerialModule.setWriteTimeout(0xffffffff);	// HAL_MAX_DELAY
 	SerialModule.begin(115200);
 
 	////////////////////
