@@ -352,7 +352,10 @@ bool Wio3G::GetTime(struct tm* tim)
 	tim->tm_sec = atoi(&parameter[16]);
 	tim->tm_wday = 0;
 	tim->tm_yday = 0;
-	tim->tm_isdst = -1;
+	tim->tm_isdst = 0;
+
+	// Update tm_wday and tm_yday
+	mktime(tim);
 
 	return RET_OK(true);
 }
