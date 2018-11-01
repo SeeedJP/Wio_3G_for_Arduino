@@ -403,8 +403,14 @@ bool Wio3G::WaitForPSRegistration(long timeout)
 	while (true) {
 		int status;
 
+#ifdef WIO_3G
 		_AtSerial.WriteCommand("AT+CGREG?");
 		if (!_AtSerial.ReadResponse("^\\+CGREG: (.*)$", 500, &response)) return RET_ERR(false, E_UNKNOWN);
+#endif // WIO_3G
+#ifdef ARDUINO_WIO_LTE_M1NB1_BG96
+		_AtSerial.WriteCommand("AT+CEREG?");
+		if (!_AtSerial.ReadResponse("^\\+CEREG: (.*)$", 500, &response)) return RET_ERR(false, E_UNKNOWN);
+#endif
 		parser.Parse(response.c_str());
 		if (parser.Size() < 2) return RET_ERR(false, E_UNKNOWN);
 		//resultCode = atoi(parser[0]);
@@ -435,8 +441,13 @@ bool Wio3G::Activate(const char* accessPointName, const char* userName, const ch
 
 	// for debug.
 #ifdef WIO_DEBUG
+#ifdef WIO_3G
 	_AtSerial.WriteCommandAndReadResponse("AT+CREG?", "^OK$", 500, NULL);
 	_AtSerial.WriteCommandAndReadResponse("AT+CGREG?", "^OK$", 500, NULL);
+#endif // WIO_3G
+#ifdef ARDUINO_WIO_LTE_M1NB1_BG96
+	_AtSerial.WriteCommandAndReadResponse("AT+CEREG?", "^OK$", 500, NULL);
+#endif
 #endif // WIO_DEBUG
 
 	StringBuilder str;
