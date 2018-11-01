@@ -437,6 +437,15 @@ bool Wio3G::Activate(const char* accessPointName, const char* userName, const ch
 	std::string response;
 	ArgumentParser parser;
 
+#ifdef ARDUINO_WIO_LTE_M1NB1_BG96
+	if(strcmp("soracom.io", accessPointName)==0){
+		_AtSerial.WriteCommandAndReadResponse("AT+COPS=1,2,\"44052\",8", "^OK$", 500, NULL);
+	}
+	else{
+		_AtSerial.WriteCommandAndReadResponse("AT+COPS=0", "^OK$", 500, NULL);
+	}
+#endif // ARDUINO_WIO_LTE_M1NB1_BG96
+
 	if (!WaitForPSRegistration(waitForRegistTimeout)) return RET_ERR(false, E_UNKNOWN);
 
 	// for debug.
