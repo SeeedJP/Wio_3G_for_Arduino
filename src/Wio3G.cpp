@@ -456,7 +456,7 @@ bool Wio3G::Activate(const char* accessPointName, const char* userName, const ch
 #endif // WIO_3G
 #ifdef ARDUINO_WIO_LTE_M1NB1_BG96
 	_AtSerial.WriteCommandAndReadResponse("AT+CEREG?", "^OK$", 500, NULL);
-#endif
+#endif // ARDUINO_WIO_LTE_M1NB1_BG96
 #endif // WIO_DEBUG
 
 	StringBuilder str;
